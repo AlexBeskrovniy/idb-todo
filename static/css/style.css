@@ -6,7 +6,113 @@
     box-sizing: border-box;
 }
 
+html {
+    font-size: 16px;
+}
+
 body {
+    background-color: #2D302F;
+    color: #e9ecef;
+}
+
+.app {
     min-height: 100vh;
-    background-color: #2D302F
+    display: flex;
+    flex-direction: column;
+
+    .header {
+        padding: 1rem 3rem;
+        border-bottom: 2px solid #343a40;
+
+        .form-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .form {
+                width: min(600px, 80vw);
+                display: flex;
+                overflow: hidden;
+                border-radius: 10px;
+                
+                .form-field {
+                    flex-grow: 1;
+
+                    &:focus {
+                        outline: none;
+                    }
+                }
+
+                .form-submit {
+                    cursor: pointer
+                }
+
+                .form-field,
+                .form-submit {
+                    padding: .5rem;
+                }
+            }
+        }
+    }
+
+    .main {
+        flex: 1 0 auto;
+
+        & h1 {
+            text-align: center;
+            margin-block: 2rem;
+        }
+
+        .todos {
+            width: min(600px, 80vw);
+            margin-inline: auto;
+
+            .todos-group {
+                margin-bottom: 1rem;
+
+                .todos-date {
+                    font-size: 1.1rem;
+                    margin-bottom: .3rem;
+                }
+
+                .todo-card {
+                    padding: 1rem;
+                    background-color: #343a40;
+                    border-radius: 10px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 2rem;
+                    margin-bottom: .5rem;
+    
+                    .todo {
+                        font-size: 1.2rem;
+                    }
+    
+                    .todo-control {
+                        & button {
+                            padding: .5rem;
+                            border-radius: 10px;
+                            cursor: pointer;
+                        }
+                    }
+    
+                    &.complited {
+                        opacity: .36;
+    
+                        .todo {
+                            text-decoration: line-through;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    .footer {
+        padding: 1rem 3rem;
+        text-align: center;
+        font-size: 1rem;
+        border-top: 2px solid #343a40;
+    }
 }
