@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Let's do it</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="app">
+    <todo-list class="app" data-app>
         <header class="header">
             <div class="form-wrapper">
-                <form class="form" action="#">
+                <form class="form" action="#" data-form>
                     <input class="form-field" type="text" name="todo" id="todo" required placeholder="New todo...">
                     <button class="form-submit" type="Sumbit">Add</button>
                 </form>
@@ -19,30 +22,10 @@
         <main class="main">
             <h1>Let's do it!</h1>
 
-            <div class="todos">
+            <div class="todos" data-content>
                 <div class="todos-group">
                     <div class="todos-date">03.02.2024</div>
-                    <div class="todo-card">
-                        <div class="todo">Make basic HTML markup</div>
-                        <div class="todo-control">
-                            <button>Done</button>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </div>
-                    </div>
-                    <div class="todo-card complited">
-                        <div class="todo">Make indexedDB API</div>
-                        <div class="todo-control">
-                            <button>Done</button>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="todos-group">
-                    <div class="todos-date">03.02.2024</div>
-                    <div class="todo-card">
+                    <div class="todo-card" data-todo>
                         <div class="todo">Make basic HTML markup</div>
                         <div class="todo-control">
                             <button>Done</button>
@@ -64,8 +47,8 @@
         <footer class="footer">
             2024
         </footer>
-    </div>
-
-    <script src="js/script.js"></script>
+    </todo-list>
+    <script type="module" src="js/idb-adapter.js"></script>
+    <script type="module" src="js/script.js"></script>
 </body>
 </html>

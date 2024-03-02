@@ -7,12 +7,17 @@
 }
 
 html {
+    --bg-color: #2D302F;
+    --text-color: #e9ecef;
+    --accent-color: #343a40;
     font-size: 16px;
 }
 
 body {
-    background-color: #2D302F;
-    color: #e9ecef;
+    font-family: "Ubuntu", sans-serif;
+    font-weight: 400;
+    background-color: var(--bg-color);
+    color: var(--text-color);
 }
 
 .app {
@@ -22,7 +27,7 @@ body {
 
     .header {
         padding: 1rem 3rem;
-        border-bottom: 2px solid #343a40;
+        border-bottom: 2px solid var(--accent-color);
 
         .form-wrapper {
             display: flex;
@@ -61,6 +66,7 @@ body {
         & h1 {
             text-align: center;
             margin-block: 2rem;
+            font-weight: 700;
         }
 
         .todos {
@@ -73,11 +79,12 @@ body {
                 .todos-date {
                     font-size: 1.1rem;
                     margin-bottom: .3rem;
+                    opacity: .8;
                 }
 
                 .todo-card {
                     padding: 1rem;
-                    background-color: #343a40;
+                    background-color: var(--accent-color);
                     border-radius: 10px;
                     display: flex;
                     align-items: center;
@@ -113,6 +120,6 @@ body {
         padding: 1rem 3rem;
         text-align: center;
         font-size: 1rem;
-        border-top: 2px solid #343a40;
+        border-top: 2px solid var(--accent-color);
     }
 }
