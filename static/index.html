@@ -21,28 +21,24 @@
         </header>
         <main class="main">
             <h1>Let's do it!</h1>
+            <div class="todos" data-content></div>
 
-            <div class="todos" data-content>
-                <div class="todos-group">
-                    <div class="todos-date">03.02.2024</div>
-                    <div class="todo-card" data-todo>
-                        <div class="todo">Make basic HTML markup</div>
-                        <div class="todo-control">
-                            <button>Done</button>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </div>
-                    </div>
-                    <div class="todo-card complited">
-                        <div class="todo">Make indexedDB API</div>
-                        <div class="todo-control">
-                            <button>Done</button>
-                            <button>Edit</button>
-                            <button>Delete</button>
-                        </div>
-                    </div>
+            <template data-group-template>
+                <div class="todos-group" data-group>
+                    <div class="todos-date" data-date></div>
                 </div>
-            </div>
+            </template>
+                
+            <template data-card-template>
+                <todo-card class="todo-card" data-todo>
+                    <div class="todo" data-title></div>
+                    <div class="todo-control">
+                        <button>Done</button>
+                        <button>Edit</button>
+                        <button>Delete</button>
+                    </div>
+                </todo-card>
+            </template>
         </main>
         <footer class="footer">
             2024

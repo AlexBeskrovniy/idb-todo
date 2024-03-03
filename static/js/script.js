@@ -8,6 +8,8 @@ customElements.define('todo-list', class extends HTMLElement {
     connectedCallback() {
         this.$form = this.querySelector('[data-form]');
         this.$content = this.querySelector('[data-content]');
+        this.$groupTemplate = this.querySelector('[data-group-template]');
+        this.$cardTemplate = this.querySelector('[data-card-template]');
         
         this._init();
     }
@@ -22,8 +24,31 @@ customElements.define('todo-list', class extends HTMLElement {
     async _renderContent() {
         try {
             const todos = await getMany(this.db, 'todos');
-            console.log(todos);
-            console.log('rendered');
+            if (todos.lenght === 0) return;
+
+            const sortedTodos = todos.reverse().reduce((acc, cur) => {
+                const date = new Date(cur.created).toLocaleDateString();
+                if (!acc[date]) {
+                    acc[date] = [cur]
+                } else {
+                    acc[date].push(cur);
+                }
+                return acc;
+            }, {});
+
+            for (const [date, todos] of Object.entries(sortedTodos)) {
+                const groupNode = this.$groupTemplate.content.cloneNode(true);
+                groupNode.querySelector('[data-date]').textContent = new Date(date).toDateString();
+                todos.map(todo => {
+                    const todoNode = this.$cardTemplate.content.cloneNode(true);
+                    todoNode.querySelector('[data-todo]').setAttribute('id', todo.created);
+                    todoNode.querySelector('[data-title]').textContent = todo.todo;
+
+                    groupNode.querySelector('[data-group]').appendChild(todoNode);
+                });
+                
+                this.$content.appendChild(groupNode);
+            }
         } catch(err) {
             console.error(err);
         }
