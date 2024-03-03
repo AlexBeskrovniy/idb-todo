@@ -23,25 +23,25 @@ const _IDBAdapter = Object.freeze({
         });
     },
 
-    // getStore: async (db, storeName, mode='readwrite') => {
-    //     return new Promise((resolve, reject) => {
-    //         const transaction = db.transaction(storeName, mode);
-    //         const store = transaction.objectStore(storeName);
+    getOne: async (db, storeName, id, mode='readwrite') => {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, mode);
+            const store = transaction.objectStore(storeName);
+            const request = store.get(id);
 
-    //         request.onsuccess = function() {
-    //             console.log("Success", request.result);
-    //             resolve(store);
-    //         };
+            request.onsuccess = function() {
+                console.log("Success", request.result);
+                resolve([request.result, store]);
+            };
 
-    //         request.onerror = function(err) {
-    //             console.log("Error", err);
-    //             reject(err)
-    //         };
-    //     });
-    // },
+            request.onerror = function(err) {
+                console.log("Error", err);
+                reject(err)
+            };
+        });
+    },
 
     getMany: async (db, storeName, mode='readwrite') => {
-        console.log(db);
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(storeName, mode);
             const store = transaction.objectStore(storeName);
@@ -59,7 +59,7 @@ const _IDBAdapter = Object.freeze({
         });
     },
 
-    add: async (db, storeName, data, mode='readwrite') => {
+    addOne: async (db, storeName, data, mode='readwrite') => {
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(storeName, mode);
             const store = transaction.objectStore(storeName);
@@ -68,6 +68,48 @@ const _IDBAdapter = Object.freeze({
             request.onsuccess = function() {
                 console.log("Success", request.result);
                 resolve(request.result);
+            };
+
+            request.onerror = function(err) {
+                console.log("Error", err);
+                reject(err)
+            };
+        });
+    },
+    
+    updateOne: async (db, storeName, id, fields, mode='readwrite') => {
+            const [todo, store] = await _IDBAdapter.getOne(db, storeName, id);
+
+            for (const [key, value] of Object.entries(fields)) {
+                todo[key] = value;
+            }
+
+            return new Promise((resolve, reject) => {
+                const request = store.put(todo);
+
+                request.onsuccess = function() {
+                    console.log(request);
+                    console.log("Success update", id);
+                    resolve(id);
+                };
+
+                request.onerror = function(err) {
+                    console.log("Error", err);
+                    reject(err)
+                };
+            });
+    },
+
+    deleteOne: async (db, storeName, id, mode='readwrite') => {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, mode);
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(id);
+
+            request.onsuccess = function() {
+                console.log(request);
+                console.log("Success delete", id);
+                resolve(id);
             };
 
             request.onerror = function(err) {

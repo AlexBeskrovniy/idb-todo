@@ -1,5 +1,6 @@
-const { initStore, getMany, add } = IDBAdapter;
+const { initStore, getMany, addOne, updateOne, deleteOne } = IDBAdapter;
 
+const db = await initStore('todo-app-db', 'todos', 'created');
 customElements.define('todo-list', class extends HTMLElement {
     constructor() {
         super();
@@ -15,7 +16,7 @@ customElements.define('todo-list', class extends HTMLElement {
     }
 
     async _init() {
-        this.db = await initStore('todo-app-db', 'todos', 'created');
+    
         console.log('inited');
         this.$form.addEventListener('submit', this._handleSubmit.bind(this));
         await this._renderContent();
@@ -23,7 +24,7 @@ customElements.define('todo-list', class extends HTMLElement {
 
     async _renderContent() {
         try {
-            const todos = await getMany(this.db, 'todos');
+            const todos = await getMany(db, 'todos');
             if (todos.lenght === 0) return;
 
             const sortedTodos = todos.reverse().reduce((acc, cur) => {
@@ -42,11 +43,12 @@ customElements.define('todo-list', class extends HTMLElement {
                 todos.map(todo => {
                     const todoNode = this.$cardTemplate.content.cloneNode(true);
                     todoNode.querySelector('[data-todo]').setAttribute('id', todo.created);
+                    todo.done && todoNode.querySelector('[data-todo]').setAttribute('completed', '');
                     todoNode.querySelector('[data-title]').textContent = todo.todo;
 
                     groupNode.querySelector('[data-group]').appendChild(todoNode);
                 });
-                
+
                 this.$content.appendChild(groupNode);
             }
         } catch(err) {
@@ -64,14 +66,63 @@ customElements.define('todo-list', class extends HTMLElement {
         }
 
         try {
-            const newTodo = await add(this.db, 'todos', todo);
+            const newTodo = await addOne(db, 'todos', todo);
             console.log(newTodo);
         } catch(err) {
             console.error(err);
         }
     }
+});
 
-    disconnectedCallback() {
+customElements.define('todo-card', class extends HTMLElement {
+    constructor() {
+        super();
+    }
 
+    connectedCallback() {
+        this.$complitedBtn = this.querySelector('[data-complited]');
+        this.$editBtn = this.querySelector('[data-edit]');
+        this.$deleteBtn = this.querySelector('[data-delete]');
+
+        this._setListeners();
+    }
+
+    _setListeners() {
+        this.$complitedBtn.addEventListener('click', this._handleComplite.bind(this));
+        this.$editBtn.addEventListener('click', this._handleEdit.bind(this));
+        this.$deleteBtn.addEventListener('click', this._handleDelete.bind(this));
+    }
+
+    async _handleComplite(e) {
+        e.preventDefault();
+        try {
+            const updatedTodo = await updateOne(db, 'todos', this.id, {"done": !this.completed});
+            console.log(updatedTodo);
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
+    _handleEdit(e) {
+        e.preventDefault();
+
+    }
+
+    async _handleDelete(e) {
+        e.preventDefault();
+        try {
+            const deletedTodo = await deleteOne(db, 'todos', this.id);
+            console.log(deletedTodo);
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
+    get id() {
+        return +this.getAttribute('id');
+    }
+
+    get completed() {
+        return this.hasAttribute('completed');
     }
 });

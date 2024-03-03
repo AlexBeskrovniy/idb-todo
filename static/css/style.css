@@ -104,7 +104,7 @@ body {
                         }
                     }
     
-                    &.complited {
+                    &[completed] {
                         opacity: .36;
     
                         .todo {
