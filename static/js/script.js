@@ -8,6 +8,7 @@ customElements.define('todo-list', class extends HTMLElement {
 
     connectedCallback() {
         this.$form = this.querySelector('[data-form]');
+        this.$mainInput = this.$form.querySelector('[data-input]');
         this.$content = this.querySelector('[data-content]');
         this.$groupTemplate = this.querySelector('[data-group-template]');
         this.$cardTemplate = this.querySelector('[data-card-template]');
@@ -19,6 +20,7 @@ customElements.define('todo-list', class extends HTMLElement {
     
         console.log('inited');
         this.$form.addEventListener('submit', this._handleSubmit.bind(this));
+        this.addEventListener('todos:update', this._renderContent)
         await this._renderContent();
     }
 
@@ -37,6 +39,8 @@ customElements.define('todo-list', class extends HTMLElement {
                 return acc;
             }, {});
 
+            let todoGroupNodes = [];
+
             for (const [date, todos] of Object.entries(sortedTodos)) {
                 const groupNode = this.$groupTemplate.content.cloneNode(true);
                 groupNode.querySelector('[data-date]').textContent = new Date(date).toDateString();
@@ -49,8 +53,10 @@ customElements.define('todo-list', class extends HTMLElement {
                     groupNode.querySelector('[data-group]').appendChild(todoNode);
                 });
 
-                this.$content.appendChild(groupNode);
+                todoGroupNodes.push(groupNode);
             }
+
+            this.$content.replaceChildren(...todoGroupNodes);
         } catch(err) {
             console.error(err);
         }
@@ -68,8 +74,11 @@ customElements.define('todo-list', class extends HTMLElement {
         try {
             const newTodo = await addOne(db, 'todos', todo);
             console.log(newTodo);
+            this._renderContent();
         } catch(err) {
             console.error(err);
+        } finally {
+            this.$mainInput.value = null;
         }
     }
 });
@@ -98,6 +107,7 @@ customElements.define('todo-card', class extends HTMLElement {
         try {
             const updatedTodo = await updateOne(db, 'todos', this.id, {"done": !this.completed});
             console.log(updatedTodo);
+            this._sendUpdateEvent();
         } catch(err) {
             console.error(err);
         }
@@ -113,9 +123,16 @@ customElements.define('todo-card', class extends HTMLElement {
         try {
             const deletedTodo = await deleteOne(db, 'todos', this.id);
             console.log(deletedTodo);
+            this._sendUpdateEvent();
         } catch(err) {
             console.error(err);
         }
+    }
+
+    _sendUpdateEvent() {
+        this.dispatchEvent(new CustomEvent('todos:update', {
+            bubbles: true
+        }));
     }
 
     get id() {

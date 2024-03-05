@@ -74,7 +74,7 @@ body {
             margin-inline: auto;
 
             .todos-group {
-                margin-bottom: 1rem;
+                margin-bottom: 1.5rem;
 
                 .todos-date {
                     font-size: 1.1rem;
