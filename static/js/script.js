@@ -1,6 +1,7 @@
-const { initStore, getMany, addOne, updateOne, deleteOne } = IDBAdapter;
+import { IndexedDBAdapter } from "./idb-adapter.js";
 
-const db = await initStore('todo-app-db', 'todos', 'created');
+const adapter = new IndexedDBAdapter('todo-app-db', 'todos', 'created');
+const db = await adapter.initStore();
 customElements.define('todo-list', class extends HTMLElement {
     constructor() {
         super();
@@ -17,7 +18,7 @@ customElements.define('todo-list', class extends HTMLElement {
     }
 
     async _init() {
-    
+        this.db = db;
         console.log('inited');
         this.$form.addEventListener('submit', this._handleSubmit.bind(this));
         this.addEventListener('todos:update', this._renderContent)
@@ -26,7 +27,7 @@ customElements.define('todo-list', class extends HTMLElement {
 
     async _renderContent() {
         try {
-            const todos = await getMany(db, 'todos');
+            const todos = await adapter.getMany(this.db);
             if (todos.lenght === 0) return;
 
             const sortedTodos = todos.reverse().reduce((acc, cur) => {
@@ -72,7 +73,7 @@ customElements.define('todo-list', class extends HTMLElement {
         }
 
         try {
-            const newTodo = await addOne(db, 'todos', todo);
+            const newTodo = await adapter.addOne(this.db, todo);
             console.log(newTodo);
             this._renderContent();
         } catch(err) {
@@ -89,6 +90,7 @@ customElements.define('todo-card', class extends HTMLElement {
     }
 
     connectedCallback() {
+        this.db = db;
         this.$complitedBtn = this.querySelector('[data-complited]');
         this.$editBtn = this.querySelector('[data-edit]');
         this.$deleteBtn = this.querySelector('[data-delete]');
@@ -105,7 +107,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleComplite(e) {
         e.preventDefault();
         try {
-            const updatedTodo = await updateOne(db, 'todos', this.id, {"done": !this.completed});
+            const updatedTodo = await adapter.updateOne(this.db, this.id, {"done": !this.completed});
             console.log(updatedTodo);
             this._sendUpdateEvent();
         } catch(err) {
@@ -121,7 +123,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleDelete(e) {
         e.preventDefault();
         try {
-            const deletedTodo = await deleteOne(db, 'todos', this.id);
+            const deletedTodo = await adapter.deleteOne(this.db, this.id);
             console.log(deletedTodo);
             this._sendUpdateEvent();
         } catch(err) {
