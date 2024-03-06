@@ -1,5 +1,12 @@
 class IndexedDBAdapter {
     constructor(dbName, storeName, idField) {
+        if (IndexedDBAdapter._instance) {
+            console.warn("IndexedDBAdapter instance already exists.");
+            return IndexedDBAdapter._instance;
+        }
+
+        IndexedDBAdapter._instance = this;
+        
         this.db = dbName;
         this.storeName = storeName;
         this.storeIdField = idField;
