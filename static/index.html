@@ -15,7 +15,7 @@
             <div class="form-wrapper">
                 <form class="form" action="#" data-form>
                     <input class="form-field" type="text" name="todo" id="todo" required placeholder="New todo..." data-input>
-                    <button class="form-submit" type="Sumbit">Add</button>
+                    <button class="form-submit" type="sumbit">Add</button>
                 </form>
             </div>
         </header>
@@ -39,6 +39,15 @@
                     </div>
                 </todo-card>
             </template>
+            <div class="update-bar" data-update-bar>
+                <div class="form-wrapper">
+                    <form class="form" action="#" data-update-form>
+                        <input class="form-field" type="text" name="todo" id="todo-text" required data-update-text>
+                        <input class="form-field" type="hidden" name="id" id="todo-id" required data-update-id>
+                        <button class="form-submit" type="sumbit">Update</button>
+                    </form>
+                </div>
+            </div>
         </main>
         <footer class="footer">
             2024

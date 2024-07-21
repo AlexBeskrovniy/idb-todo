@@ -42,7 +42,7 @@ class IndexedDBAdapter {
 
     async getOne(db, storeName, id) {
         return new Promise((resolve, reject) => {
-            const store = this._getTransaction(db, storeName)
+            const store = this._getTransaction(db, storeName);
             const request = store.get(id);
 
             request.onsuccess = function() {
