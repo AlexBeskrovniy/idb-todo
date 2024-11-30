@@ -1,9 +1,10 @@
-import { IndexedDBAdapter } from "./idb-adapter.js";
+import { adapter } from "./idb-adapter.js";
 
 const STORE_NAME = 'todos';
 
-const adapter = new IndexedDBAdapter('todo-app-db');
-const db = await adapter.initStore(STORE_NAME, 'created');
+// const adapter = new IndexedDBAdapter('todo-app-db');
+// const db = await adapter.initStores(STORE_NAME, 'created');
+const db = adapter.db;
 customElements.define('todo-list', class extends HTMLElement {
     constructor() {
         super();

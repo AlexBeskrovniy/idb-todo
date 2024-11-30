@@ -1,5 +1,19 @@
+const storesConfig = Object.freeze({
+    stores: [
+        {
+            name: 'todos',
+            keyPath: 'created'
+        },
+        {
+            name: 'primitives',
+            keyPath: null
+        }
+    ],
+    version: 2
+});
+
 class IndexedDBAdapter {
-    constructor(dbName) {
+    constructor(dbName, storesConfig) {
         if (IndexedDBAdapter._instance) {
             console.warn("IndexedDBAdapter instance already exists.");
             return IndexedDBAdapter._instance;
@@ -8,22 +22,27 @@ class IndexedDBAdapter {
         IndexedDBAdapter._instance = this;
         
         this.dbName = dbName;
+        this.config = storesConfig;
     }
     
-    async initStore(storeName, storeIdField) {
+    init() {
         return new Promise((resolve, reject) => {
-            const connectDB = indexedDB.open(this.dbName);
+            const connectDB = indexedDB.open(this.dbName, this.config.version);
         
-            connectDB.onupgradeneeded = function() {
+            connectDB.onupgradeneeded = () => {
                 const db = connectDB.result;
-                if (!db.objectStoreNames.contains(storeName)) {
-                    db.createObjectStore(storeName, { keyPath: storeIdField });
-                }
-                console.log(db);
+                this.config.stores.forEach((store) => {
+                    if (!db.objectStoreNames.contains(store.name)) {
+                        db.createObjectStore(store.name, { keyPath: store.keyPath });
+                    }
+                })
+
+                // console.log(db);
             }
 
             connectDB.onsuccess = function() {
                 console.log('connected');
+                console.log(connectDB.result);
                 resolve(connectDB.result);
             }
 
@@ -104,7 +123,7 @@ class IndexedDBAdapter {
             request.onsuccess = function() {
                 console.log(request);
                 console.log("Success update", id);
-                resolve(id);
+                resolve(request.result);
             };
 
             request.onerror = function(err) {
@@ -121,7 +140,7 @@ class IndexedDBAdapter {
 
             request.onsuccess = function() {
                 console.log("Success delete", id);
-                resolve(id);
+                resolve(request.result);
             };
 
             request.onerror = function(err) {
@@ -130,6 +149,16 @@ class IndexedDBAdapter {
             };
         });
     }
+
+    get db() {
+        return this._db
+    }
+
+    set db(value) {
+        this._db = value;
+    }
 }
 
-export { IndexedDBAdapter };
+const adapter = new IndexedDBAdapter('todo-app-db', storesConfig);
+adapter.db = await adapter.init();
+export { adapter };
