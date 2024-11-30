@@ -31,23 +31,13 @@
                 
             <template data-card-template>
                 <todo-card class="todo-card" data-todo>
-                    <div class="todo" data-title></div>
+                    <div class="todo" contenteditable="true" data-title></div>
                     <div class="todo-control">
                         <button data-complited>Done</button>
-                        <button data-edit>Edit</button>
                         <button data-delete>Delete</button>
                     </div>
                 </todo-card>
             </template>
-            <div class="update-bar" data-update-bar>
-                <div class="form-wrapper">
-                    <form class="form" action="#" data-update-form>
-                        <input class="form-field" type="text" name="todo" id="todo-text" required data-update-text>
-                        <input class="form-field" type="hidden" name="id" id="todo-id" required data-update-id>
-                        <button class="form-submit" type="sumbit">Update</button>
-                    </form>
-                </div>
-            </div>
         </main>
         <footer class="footer">
             2024

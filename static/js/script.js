@@ -15,9 +15,6 @@ customElements.define('todo-list', class extends HTMLElement {
         this.$content = this.querySelector('[data-content]');
         this.$groupTemplate = this.querySelector('[data-group-template]');
         this.$cardTemplate = this.querySelector('[data-card-template]');
-
-        this.$bar = document.querySelector('[data-update-bar]');
-        this.$editForm = this.$bar.querySelector('[data-update-form]');
         
         this._init();
     }
@@ -26,8 +23,6 @@ customElements.define('todo-list', class extends HTMLElement {
         this.db = db;
         console.log('inited');
         this.$form.addEventListener('submit', this._handleSubmit.bind(this));
-        this.addEventListener('todo:edit', this._prepareEditForm);
-        this.$editForm.addEventListener('submit', this._handleEdit.bind(this));
         this.addEventListener('todos:update', this._renderContent)
         await this._renderContent();
     }
@@ -89,33 +84,6 @@ customElements.define('todo-list', class extends HTMLElement {
             this.$mainInput.value = null;
         }
     }
-
-    _prepareEditForm({ detail: {text, id} }) {
-        this.$editForm.querySelector('[data-update-text]').value = text;
-        this.$editForm.querySelector('[data-update-id]').value = id;
-    }
-
-    async _handleEdit(e) {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        try {
-            const updatedTodo = await adapter.updateOne(
-                this.db,
-                STORE_NAME,
-                +formData.get('id'),
-                {"todo": formData.get('todo')});
-            console.log(updatedTodo);
-
-            this.dispatchEvent(new CustomEvent('todos:update', {
-                bubbles: true
-            }));
-
-            this.$editForm.querySelector('[data-update-text]').value = '';
-            this.$editForm.querySelector('[data-update-id]').value = '';
-        } catch (err) {
-            console.error(err);
-        }
-    }
 });
 
 customElements.define('todo-card', class extends HTMLElement {
@@ -125,20 +93,20 @@ customElements.define('todo-card', class extends HTMLElement {
 
     connectedCallback() {
         this.db = db;
+        this.$todo = this.querySelector('[data-title]');
         this.$complitedBtn = this.querySelector('[data-complited]');
-        this.$editBtn = this.querySelector('[data-edit]');
         this.$deleteBtn = this.querySelector('[data-delete]');
 
         this._setListeners();
     }
 
     _setListeners() {
-        this.$complitedBtn.addEventListener('click', this._handleComplite.bind(this));
-        this.$editBtn.addEventListener('click', this._sendDataToEditForm.bind(this));
+        this.$todo.addEventListener('keypress', this._handleEnterPress.bind(this));
+        this.$complitedBtn.addEventListener('click', this._handleComplete.bind(this));
         this.$deleteBtn.addEventListener('click', this._handleDelete.bind(this));
     }
 
-    async _handleComplite(e) {
+    async _handleComplete(e) {
         e.preventDefault();
         try {
             const updatedTodo = await adapter.updateOne(this.db, STORE_NAME, this.id, {"done": !this.completed});
@@ -149,14 +117,32 @@ customElements.define('todo-card', class extends HTMLElement {
         }
     }
 
-    _sendDataToEditForm() {
-        this.dispatchEvent(new CustomEvent('todo:edit', {
-            bubbles: true,
-            detail: {
-                text: this.text,
-                id: this.id
-            }
-        }));
+    async _handleEnterPress(e) {
+        if (e.code !== 'Enter') {
+            return;
+        }
+
+        e.preventDefault();
+        console.log(this.text);
+        await this._handleEdit();
+    }
+
+    async _handleEdit() {
+        try {
+            const updatedTodo = await adapter.updateOne(
+                this.db,
+                STORE_NAME,
+                this.id,
+                {"todo": this.text});
+            console.log(updatedTodo);
+
+            this.dispatchEvent(new CustomEvent('todos:update', {
+                bubbles: true
+            }));
+
+        } catch (err) {
+            console.error(err);
+        }
     }
 
     async _handleDelete(e) {
@@ -181,7 +167,7 @@ customElements.define('todo-card', class extends HTMLElement {
     }
 
     get text() {
-        return this.querySelector('[data-title]').textContent;
+        return this.$todo.textContent;
     }
 
     get completed() {

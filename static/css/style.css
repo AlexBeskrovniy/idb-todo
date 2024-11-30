@@ -10,6 +10,7 @@ html {
     --bg-color: #2D302F;
     --text-color: #e9ecef;
     --accent-color: #343a40;
+    --accent-color-inactive: #343a4064;
     font-size: 16px;
 }
 
@@ -105,7 +106,7 @@ body {
                     }
     
                     &[completed] {
-                        opacity: .36;
+                        background: var(--accent-color-inactive);
     
                         .todo {
                             text-decoration: line-through;
