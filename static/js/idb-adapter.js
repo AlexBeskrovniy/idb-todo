@@ -9,7 +9,7 @@ const storesConfig = Object.freeze({
             keyPath: null
         }
     ],
-    version: 2
+    version: 1
 });
 
 class IndexedDBAdapter {
@@ -36,13 +36,11 @@ class IndexedDBAdapter {
                         db.createObjectStore(store.name, { keyPath: store.keyPath });
                     }
                 })
-
-                // console.log(db);
             }
 
-            connectDB.onsuccess = function() {
+            connectDB.onsuccess = () => {
                 console.log('connected');
-                console.log(connectDB.result);
+                this.db = connectDB.result;
                 resolve(connectDB.result);
             }
 
@@ -52,16 +50,16 @@ class IndexedDBAdapter {
         });
     }
 
-    _getTransaction(db, storeName, mode='readwrite') {
-        const transaction = db.transaction(storeName, mode);
+    _getTransaction(storeName, mode='readwrite') {
+        const transaction = this.db.transaction(storeName, mode);
         const store = transaction.objectStore(storeName);
 
         return store;
     }
 
-    async getOne(db, storeName, id) {
+    async getOne(storeName, id) {
         return new Promise((resolve, reject) => {
-            const store = this._getTransaction(db, storeName);
+            const store = this._getTransaction(storeName);
             const request = store.get(id);
 
             request.onsuccess = function() {
@@ -76,9 +74,9 @@ class IndexedDBAdapter {
         });
     }
 
-    async getMany(db, storeName) {
+    async getMany(storeName) {
         return new Promise((resolve, reject) => {
-            const store = this._getTransaction(db, storeName)
+            const store = this._getTransaction(storeName)
             const request = store.getAll();
 
             request.onsuccess = function() {
@@ -93,9 +91,9 @@ class IndexedDBAdapter {
         });
     }
 
-    async addOne(db, storeName, data){
+    async addOne(storeName, data){
         return new Promise((resolve, reject) => {
-            const store = this._getTransaction(db, storeName)
+            const store = this._getTransaction(storeName)
             const request = store.add(data);
 
             request.onsuccess = function() {
@@ -110,8 +108,8 @@ class IndexedDBAdapter {
         });
     }
 
-    async updateOne(db, storeName, id, fields) {
-        const [todo, store] = await this.getOne(db, storeName, id);
+    async updateOne(storeName, id, fields) {
+        const [todo, store] = await this.getOne(storeName, id);
 
         for (const [key, value] of Object.entries(fields)) {
             todo[key] = value;
@@ -133,9 +131,9 @@ class IndexedDBAdapter {
         });
     }
 
-    async deleteOne(db, storeName, id) {
+    async deleteOne(storeName, id) {
         return new Promise((resolve, reject) => {
-            const store = this._getTransaction(db, storeName)
+            const store = this._getTransaction(storeName)
             const request = store.delete(id);
 
             request.onsuccess = function() {
@@ -160,5 +158,6 @@ class IndexedDBAdapter {
 }
 
 const adapter = new IndexedDBAdapter('todo-app-db', storesConfig);
-adapter.db = await adapter.init();
+await adapter.init();
+
 export { adapter };

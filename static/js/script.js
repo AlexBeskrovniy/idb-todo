@@ -2,9 +2,6 @@ import { adapter } from "./idb-adapter.js";
 
 const STORE_NAME = 'todos';
 
-// const adapter = new IndexedDBAdapter('todo-app-db');
-// const db = await adapter.initStores(STORE_NAME, 'created');
-const db = adapter.db;
 customElements.define('todo-list', class extends HTMLElement {
     constructor() {
         super();
@@ -21,7 +18,6 @@ customElements.define('todo-list', class extends HTMLElement {
     }
 
     async _init() {
-        this.db = db;
         console.log('inited');
         this.$form.addEventListener('submit', this._handleSubmit.bind(this));
         this.addEventListener('todos:update', this._renderContent)
@@ -30,7 +26,7 @@ customElements.define('todo-list', class extends HTMLElement {
 
     async _renderContent() {
         try {
-            const todos = await adapter.getMany(this.db, STORE_NAME);
+            const todos = await adapter.getMany(STORE_NAME);
             if (todos.lenght === 0) return;
 
             const sortedTodos = todos.reverse().reduce((acc, cur) => {
@@ -76,7 +72,7 @@ customElements.define('todo-list', class extends HTMLElement {
         }
 
         try {
-            const newTodo = await adapter.addOne(this.db, STORE_NAME, todo);
+            const newTodo = await adapter.addOne(STORE_NAME, todo);
             console.log(newTodo);
             this._renderContent();
         } catch(err) {
@@ -93,7 +89,6 @@ customElements.define('todo-card', class extends HTMLElement {
     }
 
     connectedCallback() {
-        this.db = db;
         this.$todo = this.querySelector('[data-title]');
         this.$complitedBtn = this.querySelector('[data-complited]');
         this.$deleteBtn = this.querySelector('[data-delete]');
@@ -110,7 +105,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleComplete(e) {
         e.preventDefault();
         try {
-            const updatedTodo = await adapter.updateOne(this.db, STORE_NAME, this.id, {"done": !this.completed});
+            const updatedTodo = await adapter.updateOne(STORE_NAME, this.id, {"done": !this.completed});
             console.log(updatedTodo);
             this._sendUpdateEvent();
         } catch(err) {
@@ -130,12 +125,11 @@ customElements.define('todo-card', class extends HTMLElement {
 
     async _handleEdit() {
         try {
-            const updatedTodo = await adapter.updateOne(
-                this.db,
+            await adapter.updateOne(
                 STORE_NAME,
                 this.id,
-                {"todo": this.text});
-            console.log(updatedTodo);
+                {"todo": this.text}
+            );
 
             this.dispatchEvent(new CustomEvent('todos:update', {
                 bubbles: true
