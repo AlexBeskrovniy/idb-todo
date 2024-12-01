@@ -128,5 +128,8 @@ body {
         text-align: center;
         font-size: 1rem;
         border-top: 2px solid var(--accent-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
     }
 }

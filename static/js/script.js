@@ -105,7 +105,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleComplete(e) {
         e.preventDefault();
         try {
-            const updatedTodo = await adapter.updateOne(STORE_NAME, this.id, {"done": !this.completed});
+            const updatedTodo = await adapter.updateOne(STORE_NAME, {"done": !this.completed}, this.id );
             console.log(updatedTodo);
             this._sendUpdateEvent();
         } catch(err) {
@@ -127,8 +127,8 @@ customElements.define('todo-card', class extends HTMLElement {
         try {
             await adapter.updateOne(
                 STORE_NAME,
-                this.id,
-                {"todo": this.text}
+                {"todo": this.text},
+                this.id
             );
 
             this.dispatchEvent(new CustomEvent('todos:update', {
@@ -143,7 +143,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleDelete(e) {
         e.preventDefault();
         try {
-            const deletedTodo = await adapter.deleteOne(this.db, STORE_NAME, this.id);
+            const deletedTodo = await adapter.deleteOne(STORE_NAME, this.id);
             console.log(deletedTodo);
             this._sendUpdateEvent();
         } catch(err) {

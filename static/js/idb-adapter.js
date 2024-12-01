@@ -57,7 +57,8 @@ class IndexedDBAdapter {
         return store;
     }
 
-    async getOne(storeName, id) {
+    async _getOneWithTransaction(storeName, id) {
+        console.log(storeName, id);
         return new Promise((resolve, reject) => {
             const store = this._getTransaction(storeName);
             const request = store.get(id);
@@ -65,6 +66,23 @@ class IndexedDBAdapter {
             request.onsuccess = function() {
                 console.log("Success", request.result);
                 resolve([request.result, store]);
+            };
+
+            request.onerror = function(err) {
+                console.log("Error", err);
+                reject(err)
+            };
+        });
+    }
+
+    async getOne(storeName, id) {
+        return new Promise((resolve, reject) => {
+            const store = this._getTransaction(storeName);
+            const request = store.get(id);
+
+            request.onsuccess = function() {
+                console.log("Success", request.result);
+                resolve(request.result);
             };
 
             request.onerror = function(err) {
@@ -91,10 +109,10 @@ class IndexedDBAdapter {
         });
     }
 
-    async addOne(storeName, data){
+    async addOne(storeName, data, key = undefined){
         return new Promise((resolve, reject) => {
             const store = this._getTransaction(storeName)
-            const request = store.add(data);
+            const request = store.add(data, key);
 
             request.onsuccess = function() {
                 console.log("Success", request.result);
@@ -108,8 +126,26 @@ class IndexedDBAdapter {
         });
     }
 
-    async updateOne(storeName, id, fields) {
-        const [todo, store] = await this.getOne(storeName, id);
+    async setOne(storeName, data, id) {
+        return new Promise((resolve, reject) => {
+            const store = this._getTransaction(storeName);
+            const request = store.put(data, id);
+
+            request.onsuccess = function() {
+                console.log("Success", request.result);
+                resolve(request.result);
+            };
+
+            request.onerror = function(err) {
+                console.log("Error", err);
+                reject(err)
+            };
+        });
+
+    }
+
+    async updateOne(storeName, fields, id) {
+        const [todo, store] = await this._getOneWithTransaction(storeName, id);
 
         for (const [key, value] of Object.entries(fields)) {
             todo[key] = value;
