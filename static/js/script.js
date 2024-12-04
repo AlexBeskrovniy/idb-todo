@@ -14,6 +14,7 @@ customElements.define('todo-list', class extends HTMLElement {
         this.$groupTemplate = this.querySelector('[data-group-template]');
         this.$cardTemplate = this.querySelector('[data-card-template]');
         this.$clearButton = this.querySelector('[data-clear]');
+        this.$itemsCount = this.querySelector('[data-count]');
         
         this._init();
     }
@@ -28,7 +29,7 @@ customElements.define('todo-list', class extends HTMLElement {
     async _renderContent() {
         try {
             const todos = await adapter.getMany(STORE_NAME);
-
+            
             if (todos.length > 0) {
                 const sortedTodos = todos.reverse().reduce((acc, cur) => {
                     const date = new Date(cur.created).toLocaleDateString();
@@ -62,6 +63,9 @@ customElements.define('todo-list', class extends HTMLElement {
             }
         } catch(err) {
             console.error(err);
+        } finally {
+            const count = await this.count;
+            this.$itemsCount.textContent = count;
         }
     }
 
@@ -94,6 +98,17 @@ customElements.define('todo-list', class extends HTMLElement {
         } catch(err) {
             console.error(err);
         }
+    }
+
+    get count() {
+        return (async () => {
+            try {
+                return await adapter.count(STORE_NAME);
+            } catch(err) {
+                console.error(err);
+                return 0;
+            }
+        })();
     }
 });
 
@@ -157,8 +172,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleDelete(e) {
         e.preventDefault();
         try {
-            const deletedTodo = await adapter.deleteOne(STORE_NAME, this.id);
-            console.log(deletedTodo);
+           await adapter.deleteOne(STORE_NAME, this.id);
             this._sendUpdateEvent();
         } catch(err) {
             console.error(err);

@@ -66,8 +66,18 @@ body {
 
         & h1 {
             text-align: center;
-            margin-block: 2rem;
+            margin-block: 2rem 1rem;
             font-weight: 700;
+        }
+
+        .todos-info {
+            margin-block: 1rem;
+            text-align: center;
+
+            .todos-count {
+                font-size: 1.5rem;
+                font-weight: 700;
+            }
         }
 
         .todos {

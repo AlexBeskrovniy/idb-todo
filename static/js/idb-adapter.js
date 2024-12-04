@@ -201,6 +201,22 @@ class IndexedDBAdapter {
         });
     }
 
+    async count(storeName) {
+        return new Promise((resolve, reject) => {
+            const store = this._getStore(storeName);
+            const request = store.count();
+
+            request.onsuccess = () => {
+                resolve(request.result);
+            }
+
+            request.onerror = (err) => {
+                console.error(err);
+                reject(err);
+            }
+        });
+    }
+
     get db() {
         return this._db
     }
