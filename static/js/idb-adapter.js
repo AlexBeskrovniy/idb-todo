@@ -44,9 +44,25 @@ class IndexedDBAdapter {
                 resolve(connectDB.result);
             }
 
-            connectDB.onerror = function(err) {
+            connectDB.onerror = (err) => {
+                console.error(err)
                 reject(err);
             }
+        });
+    }
+
+    _promisifiedQuery(queryName, storeName, args) {
+        const queryArgs = args || [];
+
+        return new Promise((resolve, reject) => {
+            const store = this._getStore(storeName);
+            const request = store[queryName](...queryArgs);
+
+            request.addEventListener('success', (e) => resolve(e.target.result));
+            request.addEventListener('error', (e) => {
+                console.log(e);
+                reject(e)
+            })
         });
     }
 
@@ -57,11 +73,10 @@ class IndexedDBAdapter {
         return store;
     }
 
-    async _getOneWithStore(storeName, id) {
-        console.log(storeName, id);
+    async _getOneWithStore(storeName, key) {
         return new Promise((resolve, reject) => {
             const store = this._getStore(storeName);
-            const request = store.get(id);
+            const request = store.get(key);
 
             request.onsuccess = function() {
                 console.log("Success", request.result);
@@ -75,79 +90,83 @@ class IndexedDBAdapter {
         });
     }
 
-    async getOne(storeName, id) {
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName);
-            const request = store.get(id);
+    async getOne(storeName, key) {
+        return this._promisifiedQuery('get', storeName, [key]);
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName);
+        //     const request = store.get(id);
 
-            request.onsuccess = function() {
-                console.log("Success", request.result);
-                resolve(request.result);
-            };
+        //     request.onsuccess = function() {
+        //         console.log("Success", request.result);
+        //         resolve(request.result);
+        //     };
 
-            request.onerror = function(err) {
-                console.log("Error", err);
-                reject(err)
-            };
-        });
+        //     request.onerror = function(err) {
+        //         console.log("Error", err);
+        //         reject(err)
+        //     };
+        // });
     }
 
     async getMany(storeName) {
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName)
-            const request = store.getAll();
+        return this._promisifiedQuery('getAll', storeName);
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName)
+        //     const request = store.getAll();
 
-            request.onsuccess = function() {
-                console.log("Success", request.result);
-                resolve(request.result);
-            };
+        //     request.onsuccess = function() {
+        //         console.log("Success", request.result);
+        //         resolve(request.result);
+        //     };
 
-            request.onerror = function(err) {
-                console.log("Error", err);
-                reject(err)
-            };
-        });
+        //     request.onerror = function(err) {
+        //         console.log("Error", err);
+        //         reject(err)
+        //     };
+        // });
     }
 
     async addOne(storeName, data, key = undefined){
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName)
-            const request = store.add(data, key);
+        return this._promisifiedQuery('add', storeName, [data, key])
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName)
+        //     const request = store.add(data, key);
 
-            request.onsuccess = function() {
-                console.log("Success", request.result);
-                resolve(request.result);
-            };
+        //     request.onsuccess = function() {
+        //         console.log("Success", request.result);
+        //         resolve(request.result);
+        //     };
 
-            request.onerror = function(err) {
-                console.log("Error", err);
-                reject(err)
-            };
-        });
+        //     request.onerror = function(err) {
+        //         console.log("Error", err);
+        //         reject(err)
+        //     };
+        // });
     }
 
-    async setOne(storeName, data, id) {
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName);
-            const request = store.put(data, id);
+    async setOne(storeName, data, key) {
+        return this._promisifiedQuery('put', storeName, [data, key])
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName);
+        //     const request = store.put(data, id);
 
-            request.onsuccess = function() {
-                console.log("Success", request.result);
-                resolve(request.result);
-            };
+        //     request.onsuccess = function() {
+        //         console.log("Success", request.result);
+        //         resolve(request.result);
+        //     };
 
-            request.onerror = function(err) {
-                console.log("Error", err);
-                reject(err)
-            };
-        });
+        //     request.onerror = function(err) {
+        //         console.log("Error", err);
+        //         reject(err)
+        //     };
+        // });
 
     }
 
-    async updateOne(storeName, fields, id) {
-        const [todo, store] = await this._getOneWithStore(storeName, id);
+    async updateOne(storeName, data, key) {
+        const [todo, store] = await this._getOneWithStore(storeName, key);
 
-        for (const [key, value] of Object.entries(fields)) {
+        for (const [key, value] of Object.entries(data)) {
             todo[key] = value;
         }
 
@@ -156,7 +175,7 @@ class IndexedDBAdapter {
 
             request.onsuccess = function() {
                 console.log(request);
-                console.log("Success update", id);
+                console.log("Success update", key);
                 resolve(request.result);
             };
 
@@ -167,54 +186,57 @@ class IndexedDBAdapter {
         });
     }
 
-    async deleteOne(storeName, id) {
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName)
-            const request = store.delete(id);
+    async deleteOne(storeName, key) {
+        return this._promisifiedQuery('delete', storeName, [key])
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName)
+        //     const request = store.delete(id);
 
-            request.onsuccess = function() {
-                console.log("Success delete", id);
-                resolve(request.result);
-            };
+        //     request.onsuccess = function() {
+        //         console.log("Success delete", id);
+        //         resolve(request.result);
+        //     };
 
-            request.onerror = function(err) {
-                console.log("Error", err);
-                reject(err)
-            };
-        });
+        //     request.onerror = function(err) {
+        //         console.log("Error", err);
+        //         reject(err)
+        //     };
+        // });
     }
 
     async clearStore(storeName) {
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName);
-            const request = store.clear();
+        return this._promisifiedQuery('clear', storeName)
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName);
+        //     const request = store.clear();
 
-            request.onsuccess = () => {
-                console.log("Cleared store");
-                resolve(true);
-            }
+        //     request.onsuccess = () => {
+        //         console.log("Cleared store");
+        //         resolve(true);
+        //     }
 
-            request.onerror = (err) => {
-                console.error(err);
-                reject(err);
-            }
-        });
+        //     request.onerror = (err) => {
+        //         console.error(err);
+        //         reject(err);
+        //     }
+        // });
     }
 
     async count(storeName) {
-        return new Promise((resolve, reject) => {
-            const store = this._getStore(storeName);
-            const request = store.count();
+        return this._promisifiedQuery('count', storeName)
+        // return new Promise((resolve, reject) => {
+        //     const store = this._getStore(storeName);
+        //     const request = store.count();
 
-            request.onsuccess = () => {
-                resolve(request.result);
-            }
+        //     request.onsuccess = () => {
+        //         resolve(request.result);
+        //     }
 
-            request.onerror = (err) => {
-                console.error(err);
-                reject(err);
-            }
-        });
+        //     request.onerror = (err) => {
+        //         console.error(err);
+        //         reject(err);
+        //     }
+        // });
     }
 
     get db() {
