@@ -131,5 +131,11 @@ body {
         display: flex;
         align-items: center;
         justify-content: space-around;
+
+        .footer-clear-btn {
+            padding: .5rem;
+            border-radius: 10px;
+            cursor: pointer;
+        }
     }
 }

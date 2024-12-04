@@ -13,50 +13,53 @@ customElements.define('todo-list', class extends HTMLElement {
         this.$content = this.querySelector('[data-content]');
         this.$groupTemplate = this.querySelector('[data-group-template]');
         this.$cardTemplate = this.querySelector('[data-card-template]');
+        this.$clearButton = this.querySelector('[data-clear]');
         
         this._init();
     }
 
     async _init() {
-        console.log('inited');
+        this.addEventListener('todos:update', this._renderContent);
         this.$form.addEventListener('submit', this._handleSubmit.bind(this));
-        this.addEventListener('todos:update', this._renderContent)
+        this.$clearButton.addEventListener('click', this._handleClear.bind(this));
         await this._renderContent();
     }
 
     async _renderContent() {
         try {
             const todos = await adapter.getMany(STORE_NAME);
-            if (todos.lenght === 0) return;
 
-            const sortedTodos = todos.reverse().reduce((acc, cur) => {
-                const date = new Date(cur.created).toLocaleDateString();
-                if (!acc[date]) {
-                    acc[date] = [cur]
-                } else {
-                    acc[date].push(cur);
+            if (todos.length > 0) {
+                const sortedTodos = todos.reverse().reduce((acc, cur) => {
+                    const date = new Date(cur.created).toLocaleDateString();
+                    if (!acc[date]) {
+                        acc[date] = [cur]
+                    } else {
+                        acc[date].push(cur);
+                    }
+                    return acc;
+                }, {});
+    
+                let todoGroupNodes = [];
+    
+                for (const [date, todos] of Object.entries(sortedTodos)) {
+                    const groupNode = this.$groupTemplate.content.cloneNode(true);
+                    groupNode.querySelector('[data-date]').textContent = new Date(date).toDateString();
+                    todos.map(todo => {
+                        const todoNode = this.$cardTemplate.content.cloneNode(true);
+                        todoNode.querySelector('[data-todo]').setAttribute('id', todo.created);
+                        todo.done && todoNode.querySelector('[data-todo]').setAttribute('completed', '');
+                        todoNode.querySelector('[data-title]').textContent = todo.todo;
+    
+                        groupNode.querySelector('[data-group]').appendChild(todoNode);
+                    });
+    
+                    todoGroupNodes.push(groupNode);
                 }
-                return acc;
-            }, {});
-
-            let todoGroupNodes = [];
-
-            for (const [date, todos] of Object.entries(sortedTodos)) {
-                const groupNode = this.$groupTemplate.content.cloneNode(true);
-                groupNode.querySelector('[data-date]').textContent = new Date(date).toDateString();
-                todos.map(todo => {
-                    const todoNode = this.$cardTemplate.content.cloneNode(true);
-                    todoNode.querySelector('[data-todo]').setAttribute('id', todo.created);
-                    todo.done && todoNode.querySelector('[data-todo]').setAttribute('completed', '');
-                    todoNode.querySelector('[data-title]').textContent = todo.todo;
-
-                    groupNode.querySelector('[data-group]').appendChild(todoNode);
-                });
-
-                todoGroupNodes.push(groupNode);
+    
+                this.$content.replaceChildren(...todoGroupNodes);
+                this.$clearButton.removeAttribute('hidden');
             }
-
-            this.$content.replaceChildren(...todoGroupNodes);
         } catch(err) {
             console.error(err);
         }
@@ -81,6 +84,17 @@ customElements.define('todo-list', class extends HTMLElement {
             this.$mainInput.value = null;
         }
     }
+
+    async _handleClear(e) {
+        try {
+            await adapter.clearStore(STORE_NAME);
+            this._renderContent();
+            this.$clearButton.setAttribute('hidden', '');
+            this.$content.replaceChildren('');
+        } catch(err) {
+            console.error(err);
+        }
+    }
 });
 
 customElements.define('todo-card', class extends HTMLElement {
@@ -90,7 +104,7 @@ customElements.define('todo-card', class extends HTMLElement {
 
     connectedCallback() {
         this.$todo = this.querySelector('[data-title]');
-        this.$complitedBtn = this.querySelector('[data-complited]');
+        this.$completedBtn = this.querySelector('[data-completed]');
         this.$deleteBtn = this.querySelector('[data-delete]');
 
         this._setListeners();
@@ -98,7 +112,7 @@ customElements.define('todo-card', class extends HTMLElement {
 
     _setListeners() {
         this.$todo.addEventListener('keypress', this._handleEnterPress.bind(this));
-        this.$complitedBtn.addEventListener('click', this._handleComplete.bind(this));
+        this.$completedBtn.addEventListener('click', this._handleComplete.bind(this));
         this.$deleteBtn.addEventListener('click', this._handleDelete.bind(this));
     }
 

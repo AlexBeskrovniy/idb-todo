@@ -11,5 +11,5 @@ server.get('/', (_, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Server started on port ${PORT}`);
+    console.log(`Server started on \x1b[34mhttp://localhost:${PORT}`);
 });
