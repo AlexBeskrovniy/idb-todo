@@ -61,7 +61,7 @@ class IndexedDBAdapter {
             request.addEventListener('success', (e) => resolve(e.target.result));
             request.addEventListener('error', (e) => {
                 console.error("Error", e.target.error);
-                reject(e.target.error)
+                reject(e.target.error);
             })
         });
     }
@@ -73,32 +73,33 @@ class IndexedDBAdapter {
         return store;
     }
 
-    async get(storeName, key) {
+   get(storeName, key) {
         return this._promisifiedQuery('get', storeName, [key]);
     }
 
-    async getAll(storeName) {
+    getAll(storeName) {
         return this._promisifiedQuery('getAll', storeName);
     }
 
-    async add(storeName, data, key = undefined){
-        return this._promisifiedQuery('add', storeName, [data, key])
+    add(storeName, data, key = undefined){
+        return this._promisifiedQuery('add', storeName, [data, key]);
     }
 
-    async set(storeName, data, key) {
-        return this._promisifiedQuery('put', storeName, [data, key])
+    // 'put' method of the indexed DB store creates a new item or updates existed
+    set(storeName, data, key) {
+        return this._promisifiedQuery('put', storeName, [data, key]);
     }
 
-    async delete(storeName, key) {
-        return this._promisifiedQuery('delete', storeName, [key])
+    delete(storeName, key) {
+        return this._promisifiedQuery('delete', storeName, [key]);
     }
 
-    async clear(storeName) {
-        return this._promisifiedQuery('clear', storeName)
+    clear(storeName) {
+        return this._promisifiedQuery('clear', storeName);
     }
 
-    async count(storeName) {
-        return this._promisifiedQuery('count', storeName)
+    count(storeName) {
+        return this._promisifiedQuery('count', storeName);
     }
 
     async update(storeName, data, key) {
@@ -122,7 +123,7 @@ class IndexedDBAdapter {
         });
     }
 
-    async _getOneWithStore(storeName, key) {
+    _getOneWithStore(storeName, key) {
         return new Promise((resolve, reject) => {
             const store = this._getStore(storeName);
             const request = store.get(key);
