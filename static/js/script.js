@@ -28,8 +28,8 @@ customElements.define('todo-list', class extends HTMLElement {
 
     async _renderContent() {
         try {
-            const todos = await adapter.getMany(STORE_NAME);
-            
+            const todos = await adapter.getAll(STORE_NAME);
+            console.log(todos)
             if (todos.length > 0) {
                 const sortedTodos = todos.reverse().reduce((acc, cur) => {
                     const date = new Date(cur.created).toLocaleDateString();
@@ -66,6 +66,9 @@ customElements.define('todo-list', class extends HTMLElement {
         } finally {
             const count = await this.count;
             this.$itemsCount.textContent = count;
+            if (count === 0) {
+                this.$content.innerHTML = '';
+            }
         }
     }
 
@@ -79,7 +82,7 @@ customElements.define('todo-list', class extends HTMLElement {
         }
 
         try {
-            const newTodo = await adapter.addOne(STORE_NAME, todo);
+            const newTodo = await adapter.add(STORE_NAME, todo);
             console.log(newTodo);
             this._renderContent();
         } catch(err) {
@@ -91,7 +94,7 @@ customElements.define('todo-list', class extends HTMLElement {
 
     async _handleClear(e) {
         try {
-            await adapter.clearStore(STORE_NAME);
+            await adapter.clear(STORE_NAME);
             this._renderContent();
             this.$clearButton.setAttribute('hidden', '');
             this.$content.replaceChildren('');
@@ -134,7 +137,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleComplete(e) {
         e.preventDefault();
         try {
-            const updatedTodo = await adapter.updateOne(STORE_NAME, {"done": !this.completed}, this.id );
+            const updatedTodo = await adapter.update(STORE_NAME, {"done": !this.completed}, this.id );
             console.log(updatedTodo);
             this._sendUpdateEvent();
         } catch(err) {
@@ -154,7 +157,7 @@ customElements.define('todo-card', class extends HTMLElement {
 
     async _handleEdit() {
         try {
-            await adapter.updateOne(
+            await adapter.update(
                 STORE_NAME,
                 {"todo": this.text},
                 this.id
@@ -172,7 +175,7 @@ customElements.define('todo-card', class extends HTMLElement {
     async _handleDelete(e) {
         e.preventDefault();
         try {
-           await adapter.deleteOne(STORE_NAME, this.id);
+            await adapter.delete(STORE_NAME, this.id);
             this._sendUpdateEvent();
         } catch(err) {
             console.error(err);
