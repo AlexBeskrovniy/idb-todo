@@ -200,3 +200,6 @@ customElements.define('todo-card', class extends HTMLElement {
         return this.hasAttribute('completed');
     }
 });
+
+// Date in footer
+document.getElementById('date').textContent = new Date().getFullYear();

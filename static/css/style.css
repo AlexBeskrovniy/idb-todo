@@ -141,11 +141,18 @@ body {
         display: flex;
         align-items: center;
         justify-content: space-around;
+        gap: .8rem;
 
         .footer-clear-btn {
             padding: .5rem;
             border-radius: 10px;
             cursor: pointer;
         }
+    }
+}
+
+@media (width <= 992px) {
+    .footer {
+        flex-direction: column;
     }
 }
